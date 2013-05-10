@@ -32,7 +32,7 @@ private:
         }
     }
 
-    int enterPassiveMode(string* ip,int* port);
+    TcpSocket enterPassiveMode();
 
 public:
     int connectToHost(const char* ip,int port,const char* username,const char* password);

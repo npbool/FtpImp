@@ -63,9 +63,7 @@ int FtpClient::processInput(){
         } else if(cmd_args[0]=="dir"){
             string ip;
             int port;
-            TcpSocket tmpSock;
-            enterPassiveMode(&ip,&port);
-            tmpSock.connectToServ(ip.c_str(),port);
+            TcpSocket tmpSock = enterPassiveMode();
             sendCommand("LIST\r\n");
             res = readResponse(&res_code);
             cout<<res;
@@ -85,7 +83,7 @@ int FtpClient::processInput(){
         } else if(cmd_args[0]=="get"){
             string ip;
             int port;
-            enterPassiveMode(&ip,&port);
+            TcpSocket tmpSocket = enterPassiveMode();
 
             const char* file_name = cmd_args[1].c_str();
             sprintf(cmd_buf,"RETR %s\r\n",file_name);
@@ -94,8 +92,6 @@ int FtpClient::processInput(){
             cout<<res;
             if(res[0]=='1'){
                 printf("Receving file %s\n",file_name);
-                TcpSocket tmpSocket;
-                tmpSocket.connectToServ(ip.c_str(),port);
                 const int READ_BUF_LEN=1024;
                 char buf[READ_BUF_LEN];
                 FILE* file = fopen(file_name,"w");
@@ -110,14 +106,14 @@ int FtpClient::processInput(){
                 }
                 printf("Receive %d bytes\n",total_size);
                 fclose(file);
-                tmpSocket.close();
                 res = readResponse(&res_code);
                 cout<<res;
             }
+            tmpSocket.close();
         } else if(cmd_args[0]=="put"){
             string ip;
             int port;
-            enterPassiveMode(&ip,&port);
+            TcpSocket tmpSocket = enterPassiveMode();
 
             const char* file_name = cmd_args[1].c_str();
             sprintf(cmd_buf,"STOR %s\r\n",file_name);
@@ -125,8 +121,6 @@ int FtpClient::processInput(){
             res = readResponse(&res_code);
             cout<<res;
             if(res[0]=='1'){
-                TcpSocket tmpSocket;
-                tmpSocket.connectToServ(ip.c_str(),port);
 
                 const int READ_BUF_SIZE=1024;
                 char buf[READ_BUF_SIZE];
@@ -156,12 +150,14 @@ int FtpClient::processInput(){
             cout<<"wrong command"<<endl;
         }
 
-        cout<<"FTP< ";
+        cout<<endl<<"FTP< ";
     }
     return 0;
 }
-int FtpClient::enterPassiveMode(string* ip,int* port){
+TcpSocket FtpClient::enterPassiveMode(){
     sendCommand("PASV\r\n");
+    string ip;
+    int port;
     string res;
     int res_code;
     res = readResponse(&res_code);
@@ -178,10 +174,10 @@ int FtpClient::enterPassiveMode(string* ip,int* port){
             }
         }
         ++ed;
-        *ip = res.substr(st,ed-st-1);
-        *port = 0;
+        ip = res.substr(st,ed-st-1);
+        port = 0;
         while(res[ed]!=','){
-            *port = (*port) * 10 + res[ed]-'0';
+            port = (port) * 10 + res[ed]-'0';
             ++ed;
         }
         ++ed;
@@ -190,15 +186,16 @@ int FtpClient::enterPassiveMode(string* ip,int* port){
             lowpart = lowpart * 10 + res[ed]-'0';
             ++ed;
         }
-        *port = (*port<<8)+lowpart;
-        printf("passive ip:%s port:%d\n",ip->c_str(),*port);
-        return 0;
-    } else {
-        return -1;
+        port = (port<<8)+lowpart;
+        printf("passive ip:%s port:%d\n",ip.c_str(),port);
+
+        TcpSocket sock;
+        sock.connectToServ(ip.c_str(),port);
+        return sock;
     }
 }
 int main(int argc,char* argv[]){
     FtpClient c;
-    c.connectToHost("127.0.0.1",TEST_PORT,argv[1],argv[2]);
+    c.connectToHost("127.0.0.1",atoi(argv[1]),argv[2],argv[3]);
     c.processInput();
 }
