@@ -17,15 +17,18 @@ private:
 
     string cmd_args[3];
     int cmd_argc;
-    void FtpServer::parse(string cmd){
+    void parse(string cmd){
         cmd_argc = 0;
         int st = 0;
-        for(int i=0;i<cmd.size();++i){
+        for(int i=0;i<cmd.length();++i){
             if(cmd[i]==' ' || cmd[i]=='\n'){
-                cmd_args[argi++] = cmd.substr(st,i-st);
+                cmd_args[cmd_argc++] = cmd.substr(st,i-st);
                 st = i+1;
-                if(argi==3) return;
+                if(cmd_argc==3) return;
             }
+        }
+        if(cmd[cmd.length()-1] != '\n'){
+            cmd_args[cmd_argc++] = cmd.substr(st,cmd.length()-st);
         }
     }
 
@@ -33,7 +36,7 @@ private:
 
 public:
     int connectToHost(const char* ip,int port,const char* username,const char* password);
-    void processInput();
+    int processInput();
 };
 
 #endif // FTPCLIENT_H

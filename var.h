@@ -6,10 +6,14 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include <assert.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 using std::string;
 
-const int CNTL_PORT=20;
-const int DATA_PORT=21;
+const int CNTL_PORT=21;
+const int DATA_PORT=20;
 const int TEST_PORT=12345;
 
 

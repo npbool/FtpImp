@@ -10,7 +10,7 @@ private:
     TcpSocket ctrlSock; //使用Fork多进程模型，每个FtpServer只服务一个client
     TcpServer* tmpServer;
 
-    const int CMD_BUF_LEN=256;
+    static const int CMD_BUF_LEN=256;
     char cmd_buf[CMD_BUF_LEN];
 
     bool passive;
@@ -30,6 +30,11 @@ public:
         pwd = "/";
         tmpServer=0;
         chdir(root_dir.c_str());
+        //if(chroot(root_dir.c_str())<0){
+            //perror("chroot error!");
+        //} else {
+            //chdir("/");
+        //}
     }
     void run();
     int processLogin();

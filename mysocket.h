@@ -58,20 +58,20 @@ struct TcpSocket{
             int len = recv(buf,BUF_SIZE);
             if(len>0){
                 res += string(buf);
-                cout<<"part:"<<res<<endl;
+                //cout<<"part:"<<res<<endl;
                 if(strstr(buf,"\r\n")!=NULL){
                     *res_code=0;
-                    printf("Response:%s\n",res.c_str());
+                    //printf("Response:%s\n",res.c_str());
                     return res;
                 }
             } else {
                 *res_code = -1;
-                return "";
+                return res;
             }
         }
     }
     int close(){
-        ::close(sockfd);
+        return ::close(sockfd);
     }
 };
 
@@ -91,8 +91,8 @@ struct TcpServer : public TcpSocket{
             perror("listen failed\n");
             return -1;
         }
-        printf("server ip:%s",inet_ntoa(servaddr.sin_addr));
-
+        //printf("server ip:%s",inet_ntoa(servaddr.sin_addr));
+        return 0;
     }
     TcpSocket getOneConn(){
         while(true){
