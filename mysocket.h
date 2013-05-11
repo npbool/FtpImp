@@ -73,6 +73,38 @@ struct TcpSocket{
     int close(){
         return ::close(sockfd);
     }
+    
+    int sendFile(const char* file_name){
+        const int READ_BUF_SIZE=1024;
+        char buf[READ_BUF_SIZE];
+        FILE* file = fopen(file_name,"r");
+        if(file==NULL){
+            return -1;
+        }
+        int read_size = 0;
+        int total_size = 0;
+        while((read_size=fread(buf,1,READ_BUF_SIZE,file))>0){
+            send(buf,read_size);
+            total_size+=read_size;
+        }
+        return total_size;
+    }
+    int recvFile(const char* file_name){
+        const int READ_BUF_LEN=1024;
+        char buf[READ_BUF_LEN];
+        FILE* file = fopen(file_name,"w");
+        if(file==NULL){
+            return -1;
+        }
+        int recv_len = 0;
+        int total_size = 0;
+        while((recv_len = recv(buf,READ_BUF_LEN))>0){
+            fwrite(buf,1,recv_len,file);
+            total_size += recv_len;
+        }
+        fclose(file);
+        return total_size;
+    }
 };
 
 
